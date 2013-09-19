@@ -6,9 +6,11 @@ import com.smartfoxserver.v2.annotations.Instantiation;
 import com.smartfoxserver.v2.annotations.Instantiation.InstantiationMode;
 import com.smartfoxserver.v2.api.CreateRoomSettings;
 import com.smartfoxserver.v2.api.CreateRoomSettings.RoomExtensionSettings;
+import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.data.ISFSObject;
 import com.smartfoxserver.v2.exceptions.SFSCreateRoomException;
+import com.smartfoxserver.v2.exceptions.SFSJoinRoomException;
 import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
 import com.smartfoxserver.v2.extensions.ExtensionLogLevel;
 
@@ -38,12 +40,20 @@ public void handleClientRequest(User player, ISFSObject params) {
 	
 	try	{
 		
-	parentExt.getParentZone().createRoom(settings, player);
-	
-	
+	Room room = parentExt.getParentZone().createRoom(settings, player);	
 	parentExt.trace("Room created:" + roomName);
+	parentExt.trace("Room members count:" + room.getUserList().size());
+	
+	room.addUser(player);
+	
+	parentExt.trace("Room members count:" + room.getUserList().size());
 	}
 	catch (SFSCreateRoomException e) {			
+		// TODO: handle exception
+		
+		trace(ExtensionLogLevel.ERROR, e.getMessage());
+	}
+	catch (SFSJoinRoomException e) {
 		// TODO: handle exception
 		
 		trace(ExtensionLogLevel.ERROR, e.getMessage());
@@ -51,7 +61,7 @@ public void handleClientRequest(User player, ISFSObject params) {
 }
 
 private String GetRandomRoomName(){
-	return "Game#" + new Random().nextInt(1000000);
+	return "Game#" + new Random().nextInt(1000);
 }
 
 }
